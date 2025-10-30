@@ -2,8 +2,8 @@
 
 This project is a complete, end-to-end prototype for identifying elephants in aerial imagery to aid in the proactive mitigation of Human-Elephant Conflict (HEC). It features a trained PyTorch object detection model, a full training and data-cleaning pipeline, and a user-friendly web application for real-time inference.
 
-<!-- ![Screenshot of the final Elephant Detection UI]([INSERT_YOUR_UI_SCREENSHOT_HERE]) -->
-<!-- *(Suggestion: Take a screenshot of your beautiful web app and link it here!)* -->
+![Screenshot of the final Elephant Detection UI]([INSERT_YOUR_UI_SCREENSHOT_HERE])
+*(Suggestion: Take a screenshot of your beautiful web app and link it here!)*
 
 ## 📖 Project Overview
 
@@ -36,22 +36,22 @@ Follow these steps to set up the project environment.
 ### 1. Clone the Repository
 
 (If you have this on Git, otherwise skip to step 2)
-''' bash
-git clone https://github.com/Harishankar00/Elephant_Detection
+git clone [YOUR_REPOSITORY_URL]
 cd Elephant_Detection
+
+text
 
 ### 2. Create a Virtual Environment (Recommended)
 
-''' bash
 python3 -m venv venv
 source venv/bin/activate
 
+text
 
 ### 3. Install Dependencies
 
 This project requires several Python libraries. You can install them all using this command, or create a requirements.txt file.
 
-''' bash
 pip install torch torchvision
 pandas numpy
 opencv-python-headless
@@ -59,13 +59,13 @@ matplotlib tqdm
 fastapi "uvicorn[standard]"
 python-multipart aiofiles pillow
 
+text
 
 ### 4. Download the Dataset
 
 This project uses the Aerial Elephant Dataset from Kaggle:  
-'''bash
 https://www.kaggle.com/datasets/davidrpugh/aerial-elephant-dataset
-#
+
 - Download the dataset.
 - Unzip the contents.
 - Place all the files (the `.csv` files and the `training_images/test_images` folders) into the `dataset/` directory as shown in the file structure.
@@ -84,6 +84,8 @@ The `detection.ipynb` notebook contains the complete, step-by-step workflow for 
 
 jupyter notebook detection.ipynb
 
+text
+
 (Or open it in VS Code.)
 
 - **Data Cleaning:** Run the "Deep Scan" cells to verify the integrity of your downloaded image files. The cleaning script will automatically remove any corrupted files found.
@@ -101,18 +103,16 @@ This runs the interactive web app using the best pre-trained model (`model_epoch
 - **Ensure the Model is in Place:** Make sure your best model checkpoint (e.g., `model_epoch_5.pth`) is located in the `/outputs` directory.
 - **Start the Uvicorn Server:** In your terminal, from the `Elephant_Detection/` root directory, run:
 
-''' bash
 uvicorn app:app --reload
 
-#
+text
 
 - `app:app` tells Uvicorn to look for the file `app.py` and the FastAPI object `app`.
 - `--reload` enables hot-reloading, so the server restarts automatically when you save changes to `app.py`.
 
 - **Open the Application:** Once the server is running, open your web browser and go to:  
-''' bash
-http://127.0.0.1:8000
-#
+  http://127.0.0.1:8000
+
 - **Use the App:** You will see the web UI. You can now upload an image to get a real-time elephant detection!
 
 ---
