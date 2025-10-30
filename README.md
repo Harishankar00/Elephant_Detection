@@ -34,7 +34,7 @@ Follow these steps to set up the project environment.
 ### 1. Clone the Repository
 
 (If you have this on Git, otherwise skip to step 2)
-git clone [\[YOUR_REPOSITORY_URL\]](https://github.com/Harishankar00/Elephant_Detection)
+git clone (https://github.com/Harishankar00/Elephant_Detection)
 cd Elephant_Detection
 
 
