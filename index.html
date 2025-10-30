@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Elephant Detection</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@1/css/pico.min.css">
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background-color: #eef1f5; /* Lighter background */
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            overflow-x: hidden; /* Prevent horizontal scroll */
+        }
+        main.container {
+            max-width: 960px; /* Increased max-width */
+            padding: 2.5rem; /* More padding */
+            background-color: white;
+            border-radius: 1.25rem; /* Softer corners */
+            box-shadow: 0 12px 48px rgba(0, 0, 0, 0.15); /* Stronger shadow */
+            transition: all 0.3s ease-in-out;
+        }
+        main.container:hover {
+            box-shadow: 0 16px 64px rgba(0, 0, 0, 0.2);
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 0.5rem;
+        }
+        p {
+            text-align: center;
+            color: #555;
+            margin-bottom: 2rem;
+        }
+        #upload-form {
+            margin-bottom: 2rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+        #submit-button {
+            transition: background-color 0.3s ease, transform 0.2s ease;
+        }
+        #submit-button:not([aria-busy="true"]):hover {
+            background-color: #0d6efd; /* Darker blue on hover */
+            transform: translateY(-2px);
+        }
+        #loading-indicator {
+            display: none;
+            text-align: center;
+            margin-top: 2rem;
+            color: #666;
+            font-size: 1.1em;
+            animation: pulse 1.5s infinite alternate;
+        }
+        @keyframes pulse {
+            from { opacity: 0.7; }
+            to { opacity: 1; }
+        }
+        #results-container {
+            display: none;
+            flex-direction: column; /* Stack images vertically */
+            gap: 2rem; /* More space between images */
+            margin-top: 2rem;
+        }
+        #results-container article {
+            background-color: #f8f9fa;
+            padding: 1rem;
+            border-radius: 0.75rem;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+            text-align: center;
+            transition: transform 0.3s ease;
+        }
+        #results-container article:hover {
+            transform: translateY(-5px);
+        }
+        #results-container h2 {
+            margin-top: 0;
+            margin-bottom: 1rem;
+            color: #444;
+        }
+        img.result-img {
+            max-width: 100%;
+            height: auto; /* Maintain aspect ratio */
+            border-radius: 0.5rem;
+            border: 1px solid #ddd;
+            cursor: zoom-in; /* Indicate zoomable */
+            transition: transform 0.2s ease-in-out;
+        }
+        /* Modal for zoomed image */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0,0,0,0.8);
+            align-items: center;
+            justify-content: center;
+            animation: fadeIn 0.3s;
+        }
+        .modal-content {
+            margin: auto;
+            display: block;
+            max-width: 90%;
+            max-height: 90%;
+        }
+        .close {
+            position: absolute;
+            top: 15px;
+            right: 35px;
+            color: #f1f1f1;
+            font-size: 40px;
+            font-weight: bold;
+            transition: 0.3s;
+        }
+        .close:hover,
+        .close:focus {
+            color: #bbb;
+            text-decoration: none;
+            cursor: pointer;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+    </style>
+</head>
+<body>
+    <main class="container">
+        <header>
+            <h1>🐘 Elephant Detection AI</h1>
+            <p>Upload an aerial image to detect elephants using a trained PyTorch model.</p>
+        </header>
+
+        <form id="upload-form">
+            <label for="image-file">
+                Choose an image file
+                <input type="file" id="image-file" name="image_file" accept="image/*" required>
+            </label>
+            <button type="submit" id="submit-button">Detect Elephants</button>
+        </form>
+
+        <div id="loading-indicator" aria-busy="true">Detecting, please wait...</div>
+
+        <div id="results-container">
+            <article>
+                <h2>Original Image</h2>
+                <img id="original-image" class="result-img" src="#" alt="Your uploaded image">
+            </article>
+            <article>
+                <h2>Model Prediction</h2>
+                <img id="result-image" class="result-img" src="#" alt="Image with detected elephants">
+            </article>
+        </div>
+
+        <div id="myModal" class="modal">
+            <span class="close">&times;</span>
+            <img class="modal-content" id="img01">
+        </div>
+
+    </main>
+
+    <script>
+        const form = document.getElementById('upload-form');
+        const inputFile = document.getElementById('image-file');
+        const submitButton = document.getElementById('submit-button');
+        const loadingIndicator = document.getElementById('loading-indicator');
+        const resultsContainer = document.getElementById('results-container');
+        const originalImage = document.getElementById('original-image');
+        const resultImage = document.getElementById('result-image');
+
+        // Get the modal elements
+        const modal = document.getElementById("myModal");
+        const modalImg = document.getElementById("img01");
+        const span = document.getElementsByClassName("close")[0];
+
+        // Event listener for image clicks to open modal
+        document.querySelectorAll('.result-img').forEach(img => {
+            img.onclick = function(){
+                modal.style.display = "flex"; // Use flex to center
+                modalImg.src = this.src;
+            }
+        });
+
+        // Event listener for closing modal
+        span.onclick = function() { 
+            modal.style.display = "none";
+        }
+        modal.onclick = function(event) {
+            if (event.target == modal) { // Close when clicking outside the image in the modal
+                modal.style.display = "none";
+            }
+        }
+
+        form.addEventListener('submit', async (event) => {
+            event.preventDefault();
+
+            if (!inputFile.files || inputFile.files.length === 0) {
+                alert('Please select an image file.');
+                return;
+            }
+
+            submitButton.setAttribute('aria-busy', 'true');
+            submitButton.disabled = true;
+            loadingIndicator.style.display = 'block';
+            resultsContainer.style.display = 'none';
+
+            const file = inputFile.files[0];
+            originalImage.src = URL.createObjectURL(file); // Show original image immediately
+
+            const formData = new FormData();
+            formData.append('image_file', file);
+
+            try {
+                const response = await fetch('/predict/', {
+                    method: 'POST',
+                    body: formData,
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! Status: ${response.status}`);
+                }
+
+                const imageBlob = await response.blob();
+                resultImage.src = URL.createObjectURL(imageBlob);
+                resultsContainer.style.display = 'flex'; // Show results
+
+            } catch (error) {
+                console.error('Error:', error);
+                alert('An error occurred. Please check the console for details.');
+            } finally {
+                submitButton.removeAttribute('aria-busy');
+                submitButton.disabled = false;
+                loadingIndicator.style.display = 'none';
+            }
+        });
+    </script>
+</body>
+</html>

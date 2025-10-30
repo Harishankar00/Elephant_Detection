@@ -1,0 +1,13 @@
+AERIAL ELEPHANT DATASET
+
+The dataset consists of two subsets:
+- The training subset contains 1635 images with 12611 elephants,
+- The test subset contains 439 images with 2970 elephants.
+The dataset folders contains csv files describing the dataset, while the images themselves are contained in the appropriate subfolder for their subset.
+
+training_images.csv and test_images.csv contain the names of the images and the metadata for that image.
+The columns for these image csv files are: image name, sortie id, image width, image height, GSD, measured altitude, terrain altitude, GPS Altitude.
+The measured altitude was determined by an onboard laser altimeter, the gps altitude was measured by the camera gps and the terrain altitude was obtained by using the GPS coordinates in concert with SRTM data.
+
+training_elephants.csv and test_elephants.csv contain the location of the elephants for each image.
+The columns for these elephant csv files are: image name, x coordinate in image, y coordinate in image
